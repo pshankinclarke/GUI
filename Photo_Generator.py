@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jan 20 17:39:01 2018
+Created on Wed Jun 13 00:17:59 2018
 
 @author: parkershankin-clarke
 """
 from PIL import Image, ImageDraw
 import random
+import numpy as np
+
+
+
 
 img = Image.new('RGB', (600, 600), color = (random.randint(0,256), random.randint(0,256), random.randint(0,256)))
 count =0 
@@ -21,7 +25,7 @@ def get_area(height,width) :
 
 
 
-for count in range(10):
+for count in range(2):
     xS = random.randint(0,600)
     xE = random.randint(0,600)
     yS = random.randint(0,600)
@@ -35,35 +39,54 @@ for count in range(10):
     
     for x in range(xS,xE):
         for y in range (yS,yE):
-            pixy[x,y]= (160,160,160)
-
-
-#
-#for imgnum in range (1,1) : 
-#    d = imgnum + 1 
-#    img = Image.new('RGB', (600, 600), color = (73, 109, 137))
-#    print(imgnum)
-#    draw = ImageDraw.Draw(img)   
-#
-#    
-#    width,height= img.size
-#    pix = img.load()
-#    pix [0,0]= (255,255,255)
-# =============================================================================
-#     for count in range(10):
-#         i = random.randomint(0,400)
-#         j =random.randomint(0,400)
-#         for x in range(i):
-#             for y in range (j):
-#                 pix[x,y]= (160,160,160)
-#                 
-# =============================================================================
-#img.show()
-#img.save('pil_text' + str(imgnum) + '.png')
+            pixy[x,y]= (224,224,224)
+            
+for count in range(2):
+    xS = random.randint(0,600)
+    xE = random.randint(0,600)
+    yS = random.randint(0,600)
+    yE = random.randint(0,600)
+    while(xE<=xS):
+        xS = random.randint(0,600)
         
-# =============================================================================
-#     del draw
-#     del img
-#     
-# =============================================================================
-#img.show()
+    while(yE<=yS):
+        yS = random.randint(0,600)
+        
+    
+    for x in range(xS,xE):
+        for y in range (yS,yE):
+            pixy[x,y]= (128,128,128)
+
+for count in range(2):
+    xS = random.randint(0,600)
+    xE = random.randint(0,600)
+    yS = random.randint(0,600)
+    yE = random.randint(0,600)
+    while(xE<=xS):
+        xS = random.randint(0,600)
+        
+    while(yE<=yS):
+        yS = random.randint(0,600)
+        
+    
+    for x in range(xS,xE):
+        for y in range (yS,yE):
+            pixy[x,y]= (64,64,64)
+            
+for count in range(2):
+    xS = random.randint(0,600)
+    xE = random.randint(0,600)
+    yS = random.randint(0,600)
+    yE = random.randint(0,600)
+    while(xE<=xS):
+        xS = random.randint(0,600)
+        
+    while(yE<=yS):
+        yS = random.randint(0,600)
+        
+    
+    for x in range(xS,xE):
+        for y in range (yS,yE):
+            pixy[x,y]= (20,20,20)
+
+img.show()
