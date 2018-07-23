@@ -1,4 +1,3 @@
-
 import numpy as np
 from sklearn import datasets, linear_model
 import matplotlib.pyplot as plt
@@ -114,13 +113,24 @@ def classify(X, y):
     clf.fit(X, y)
     return clf
 
+def predict(X,y):
+    ''' This function returns a predicted value for a given data point where [0] corresponds to red and [1] corresponds to blue'''
+    clf = linear_model.LogisticRegressionCV()
+    clf.fit(X, y)
+    #Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.
+    data = np.array([.6,.5])
+    data = data.reshape(1, -1) 
+    prediction = clf.predict(data)
+    return p 
 
 def main():
     X, y = generate_data()
     # visualize(X, y)
     clf = classify(X, y)
     visualize(X, y, clf)
+    predict = predict(X,y)
+    print(predict)
 
 
 if __name__ == "__main__":
-    main() 
+   main() 
