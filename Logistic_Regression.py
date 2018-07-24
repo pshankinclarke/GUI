@@ -124,13 +124,17 @@ def predict(X,y):
     return p 
 
 def main():
+    prediction_list = []
     X, y = generate_data()
-    # visualize(X, y)
-    clf = classify(X, y)
-    visualize(X, y, clf)
-    predict = predict(X,y)
-    print(predict)
-
+    for i in range(0,1,10):
+        clf = classify(X, y)
+        visualize(X, y, clf)
+        predict = predict(X,y)
+        prediction_list =[predict] + prediction_list
+        print(prediction_list)
+    return prediction_list
+        
+    
 
 if __name__ == "__main__":
    main() 
