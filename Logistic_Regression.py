@@ -5,12 +5,11 @@ from PIL import Image, ImageDraw
 import random
 
 
-
 def generate_data():
     '''This function generates data by drawing an image that is made of two classes of objects "ash" and "not-ash" and returns the pixel values in array X and the labels for the pixel values in array y'''
     
     #Draws image with colors for non-ash objects
-    img = Image.new('RGB', (50, 50), color = (random.randint(0,256), random.randint(0,256), random.randint(0,256)))
+    img = Image.new('RGB', (50, 50), color = (60, 15,13))
     d = ImageDraw.Draw(img)
     
     #Intialize counter variables
@@ -18,7 +17,7 @@ def generate_data():
     countx=0
     county=0
    
-    #Load image
+    #Load iage
     pixy = img.load()
    
     #Intialize arrays
@@ -31,7 +30,7 @@ def generate_data():
         xE = random.randint(0,50)
         yS = random.randint(0,50)
         yE = random.randint(0,50)
-        gray = random.randint(100,255)
+
         while(xE<=xS):
             if (countx>50):
                 xE = random.randint(0,50)
@@ -44,20 +43,26 @@ def generate_data():
                 county=0
             county+=1    
             yS = random.randint(0,50) 
-        for x in range(xS,xE,20):
-            for y in range (yS,yE,20):
-                pixy[x,y]= (gray,gray,gray)
+        for x in range(xS,xE):
+            for y in range (yS,yE):
+                pixy[x,y]= (111,112,113)
                 ash_pixel= np.array(pixy[x,y])
                 ash_pixel_array = np.append(ash_pixel_array, ash_pixel)
     
-    #Reformat non- ash pixels 
+    #Reformat ash pixels GB 
     ash_array  = np.delete(ash_pixel_array, slice(None,None,3))
     ash_array = np.delete(ash_pixel_array,np.arange(0,ash_pixel_array.size,3))  
     ash_array  = ash_array.reshape(-1, 2)
     
+    #Reformat ash pixels RG
+    #ash_array  = np.delete(ash_pixel_array, np.arange(1,ash_pixel_array.size,3))
+    
+    #Reformat ash pixels RB 
+    #ash_array  = np.delete(ash_pixel_array, np.arange(2,ash_pixel_array.size,3))
+
     #Record values of all pixels 
-    for x in range(0,50,20):
-        for y in range (0,50,20):
+    for x in range(0,50):
+        for y in range (0,50):
             nonash_pixel  = np.array(pixy[x,y])
             nonash_pixel_array  = np.append(nonash_pixel_array,nonash_pixel)
             
@@ -74,15 +79,41 @@ def generate_data():
     
     #Concatenate arrays into an array for pixels and an array for labels
     X_before = np.concatenate((ash_array, nonash_array), axis=0)
+    print(X_before)
     X = X_before/255
-    y = np.concatenate((ash_labels,nonash_labels),axis=0)
-    print(X)
-    print(y)
-    
-
+    y = np.concatenate((ash_labels,nonash_labels),axis=0) 
 
     return X, y
 
+def get_area():
+   #This is the code that will be used when an acutal image is being opened 
+   # im = Image.open('whatever.png')
+   # width, height = im.size
+
+    #Draws image with colors for non-ash objects
+    imgg = Image.new('RGB', (50, 50), color = (60, 15,13))
+    d = ImageDraw.Draw(imgg)
+    width, height = imgg.size
+
+    #Load iage
+    pixy = imgg.load()
+    area = width * height
+    return area
+
+def training_set():
+    imgg = Image.new('RGB', (50, 50), color = (60, 15,13))
+    d = ImageDraw.Draw(imgg)
+    pix = imgg.load()
+    ash_pixel_array = np.array([])
+    for x in range(0,50,2):
+        for y in range (0,50,2):
+                  pix[x,y]= (111,112,113)
+                  ash_pixel= np.array(pix[x,y])
+                  ash_pixel_array = np.append(ash_pixel_array, ash_pixel)
+    nonash_array = np.delete(ash_pixel_array, slice(None,None,3))
+    nonash_array = np.delete(ash_pixel_array,np.arange(0,ash_pixel_array.size,3))
+    T  =  nonash_array.reshape(-1, 2)
+    return T
 
 def visualize(X, y, clf):
     plt.scatter(X[:, 0], X[:, 1], s=40, c=y, cmap=plt.cm.Spectral)
@@ -113,28 +144,30 @@ def classify(X, y):
     clf.fit(X, y)
     return clf
 
-def predict(X,y):
+def predict(X,y,T):
     ''' This function returns a predicted value for a given data point where [0] corresponds to red and [1] corresponds to blue'''
     clf = linear_model.LogisticRegressionCV()
     clf.fit(X, y)
+    prediction_array = np.array([])
     #Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.
-    data = np.array([.6,.5])
-    data = data.reshape(1, -1) 
-    prediction = clf.predict(data)
-    return p 
+    data = T
+    for i in range(len(T)):
+        elem_data = data[i]
+        elem_data = elem_data.reshape(1, -1) 
+        prediction = clf.predict(elem_data)
+        prediction_array = np.append(prediction_array,prediction)
+    return prediction_array
 
 def main():
-    prediction_list = []
+    T =  training_set()
     X, y = generate_data()
-    for i in range(0,1,10):
-        clf = classify(X, y)
-        visualize(X, y, clf)
-        predict = predict(X,y)
-        prediction_list =[predict] + prediction_list
-        print(prediction_list)
-    return prediction_list
-        
-    
+    # visualize(X, y)
+    area = get_area()
+    clf = classify(X, y)
+    #visualize(X, y, clf)
+    prediction = predict(X,y,T) 
+    number =(( len(prediction)/area ) * 100)
+    print('Ash covers {}% of the surface area'.format(number))
 
 if __name__ == "__main__":
-   main() 
+    main() 
