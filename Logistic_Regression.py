@@ -52,13 +52,15 @@ def generate_data():
     #Reformat ash pixels GB 
     ash_array  = np.delete(ash_pixel_array, slice(None,None,3))
     ash_array = np.delete(ash_pixel_array,np.arange(0,ash_pixel_array.size,3))  
-    ash_array  = ash_array.reshape(-1, 2)
+    ash_array_GB  = ash_array.reshape(-1, 2)
     
     #Reformat ash pixels RG
-    #ash_array  = np.delete(ash_pixel_array, np.arange(1,ash_pixel_array.size,3))
-    
+    ash_array  = np.delete(ash_pixel_array, np.arange(1,ash_pixel_array.size,3))
+    ash_array_RG = ash_array.reshape(-1, 2)
+
     #Reformat ash pixels RB 
-    #ash_array  = np.delete(ash_pixel_array, np.arange(2,ash_pixel_array.size,3))
+    ash_array  = np.delete(ash_pixel_array, np.arange(2,ash_pixel_array.size,3))
+    ash_array_RB = ash_array.reshape(-1, 2)
 
     #Record values of all pixels 
     for x in range(0,50):
@@ -67,23 +69,70 @@ def generate_data():
             nonash_pixel_array  = np.append(nonash_pixel_array,nonash_pixel)
             
     #Reformat non-ash pixels
+    
+    #Reformat non-ash pixels for GB
     nonash_array = np.delete(nonash_pixel_array, slice(None,None,3))
     nonash_array = np.delete(nonash_pixel_array,np.arange(0,nonash_pixel_array.size,3))  
-    nonash_array =  nonash_array.reshape(-1, 2)
+    nonash_array_GB =  nonash_array.reshape(-1, 2)
    
-    #Create Labels 
-    nonash_labels = [1] * len(nonash_array)
-    nonash_labels = np.array(nonash_labels)
-    ash_labels = [0] * len(ash_array)
-    ash_labels = np.array(ash_labels)
-    
-    #Concatenate arrays into an array for pixels and an array for labels
-    X_before = np.concatenate((ash_array, nonash_array), axis=0)
-    print(X_before)
-    X = X_before/255
-    y = np.concatenate((ash_labels,nonash_labels),axis=0) 
+    #Reformat non-ash pixels for RG
+    nonash_array_RG = np.delete(nonash_pixel_array, np.arange(1,nonash_pixel_array.size,3))
+    nonash_array_RG =  nonash_array_RG.reshape(-1, 2)
+   
+    #Reformat non-ash pixels for RB
+    nonash_array_RB = np.delete(nonash_pixel_array, np.arange(2,nonash_pixel_array.size,3))
+    nonash_array_RB =  nonash_array_RB.reshape(-1, 2)
 
-    return X, y
+    #Create Labels 
+
+    #Create labels for GB
+    nonash_labels = [1] * len(nonash_array_GB)
+    nonash_labels_GB = np.array(nonash_labels)
+    ash_labels = [0] * len(ash_array_GB)
+    ash_labels_GB = np.array(ash_labels)
+    
+    #Create labels for RG
+    nonash_labels = [1] * len(nonash_array_RG)
+    nonash_labels_RG = np.array(nonash_labels)
+    ash_labels = [0] * len(ash_array_RG)
+    ash_labels_RG = np.array(ash_labels)
+    
+    #Create labels for RB
+    nonash_labels = [1] * len(nonash_array_RB)
+    nonash_labels_RB = np.array(nonash_labels)
+    ash_labels = [0] * len(ash_array_RB)
+    ash_labels_RB = np.array(ash_labels)
+    
+
+    #Concatenate arrays into an array for pixels and an array for labels
+    
+    #Checks to see whether the dimensions agree. If the dimensions agree then the pixel values for the ash and non-ash pixel values are concatenated into a single list   
+    if len(ash_array_GB) == len(ash_array_RG) and len(ash_array_GB) == len(ash_array_RB):
+        X_before_GB = np.concatenate((ash_array_GB, nonash_array_GB), axis=0)
+        X_before_RG = np.concatenate((ash_array_RG, nonash_array_RG), axis=0)
+        X_before_RB = np.concatenate((ash_array_RB, nonash_array_RB), axis=0)
+    elif len(ash_array_GB) != len(ash_array_RG):
+        print('The dimensions of ash_array_GB and the dimensions of ash_array_RG are not equal')
+        print('The dimension of ash_array_GB is {}'.format(len(ash_array_GB)))
+        print('The dimension of ash_array_RB is {}'.format(len(ash_array_RB)))
+    elif len(ash_array_GB) != len(ash_array_RB):
+        print('The dimensions of ash_array_GB and the dimensions of ash_array_RB are not equal')
+        print('The dimension of ash_array_GB is {}'.format(len(ash_array_GB)))
+        print('The dimension of ash_array_RB is {}'.format(len(ash_array_RB)))
+    else:
+        print('An unknown error exists')
+
+    #Scale down RGB values to values that are less than 1 and greater than 0
+    X_GB = X_before_GB/255
+    X_RG = X_before_RG/255
+    X_RB = X_before_RB/255
+    
+    #Concatenate non-ash and ash pixel labels. Make sure the index values. Make sure that the index labels are in the same order as the pixel values.
+    y_GB = np.concatenate((ash_labels_GB,nonash_labels_GB),axis=0)
+    y_RG = np.concatenate((ash_labels_RG,nonash_labels_RG),axis=0)
+    y_RB = np.concatenate((ash_labels_RB,nonash_labels_RB),axis=0)
+
+    return X_GB, y_GB, X_RG, y_RG, X_RB, y_RB
 
 def get_area():
    #This is the code that will be used when an acutal image is being opened 
@@ -160,14 +209,25 @@ def predict(X,y,T):
 
 def main():
     T =  training_set()
-    X, y = generate_data()
-    # visualize(X, y)
+    X_GB, y_GB ,X_RG, y_RG, X_RB, y_RB  = generate_data()
+    training_data = np.array([X_GB,X_RG,X_RB])
+    labels = np.array([y_GB,y_RG,y_RB])
+    #visualize(X, y)
     area = get_area()
-    clf = classify(X, y)
-    #visualize(X, y, clf)
-    prediction = predict(X,y,T) 
-    number =(( len(prediction)/area ) * 100)
-    print('Ash covers {}% of the surface area'.format(number))
+    prediction_list = []
+    final_list = []
+    for i in range(len(training_data)):
+         clf = classify(training_data[i],labels[i])
+         prediction = predict(training_data[i],labels[i],T)
+         prediction_list = [prediction] + prediction_list
+         number = prediction_list[i]
+         final = ((len(prediction)/area) * 100)
+         final_list = final_list + [final]
+         print('Ash covers {}% of the surface area'.format(final))
+        # visualize(training_data[i],labels[i], clf)
+
+    avg_ash = (final_list[0] + final_list[1] + final_list[2])/3
+    print('The total surface area that the ash is covering in the image is {}%'.format(avg_ash))
 
 if __name__ == "__main__":
-    main() 
+ main()               
